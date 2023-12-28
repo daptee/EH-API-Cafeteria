@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Artisan;
 |
 */
 
-// Order Controller
 Route::post('order', [OrderController::class, 'store']);
 Route::post('payment', [PaymentController::class, 'store']);
 Route::post('product/images', [ProductController::class, 'store']);
