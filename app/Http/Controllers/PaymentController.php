@@ -45,16 +45,16 @@ class PaymentController extends Controller
             $order->save();
             Order::newOrderStatusHistory($payment_order_status_id, $order->id);
 
-            if($payment_order_status_id == OrderStatus::CONFIRMADO){
-                $client_email = $data_order['email'];
-                Log::debug($client_email);
-                try {
-                //  ver informacion de data de compra
-                    Mail::to("slarramendy@daptee.com.ar")->send(new PaymentNotification($data_order, $order));                        
-                } catch (Exception $error) {
-                    Log::debug(print_r(["message" => $error->getMessage() . " error en envio de mail a $client_email en notificacion de orden confirmada", "order_number" => $order->order_number, $error->getLine()],  true));
-                }
-            }
+            // if($payment_order_status_id == OrderStatus::CONFIRMADO){
+            //     $client_email = $data_order['email'];
+            //     Log::debug($client_email);
+            //     try {
+            //     //  ver informacion de data de compra
+            //         Mail::to("slarramendy@daptee.com.ar")->send(new PaymentNotification($data_order, $order));                        
+            //     } catch (Exception $error) {
+            //         Log::debug(print_r(["message" => $error->getMessage() . " error en envio de mail a $client_email en notificacion de orden confirmada", "order_number" => $order->order_number, $error->getLine()],  true));
+            //     }
+            // }
             
             Order::newOrderAudit($request->order_number, [
                 "info" => "Registro de pago exitoso",
