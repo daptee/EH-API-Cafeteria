@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
@@ -21,6 +22,10 @@ Route::post('payment', [PaymentController::class, 'store']);
 Route::post('product/images', [ProductController::class, 'store']);
 Route::get('product/images/{product_id}', [ProductController::class, 'product_images']);
 Route::get('product/images_principal', [ProductController::class, 'product_images_principal']);
+
+// Categories images
+Route::post('category/image', [CategoryController::class, 'store']);
+Route::get('category/image/{cod_category}', [CategoryController::class, 'category_images']);
 
 // Clear cache
 Route::get('/clear-cache', function() {
