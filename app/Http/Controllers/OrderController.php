@@ -62,4 +62,39 @@ class OrderController extends Controller
 
         return response()->json(['message' => 'Orden guardada con exito.', 'order' => $order], 200);
     }
+
+    public function show($order_id)
+    {   
+        $order = $this->model::getAllOrder($order_id);
+
+        return response()->json(['order' => $order]);
+    }
+
+    public function order_change_status(Request $request)
+    {
+        $request->validate([
+            'order_id' => ['required', Rule::exists('orders', 'id')],
+            'status_id' => ['required', Rule::exists('orders_status', 'id')]
+        ]);
+
+        try {
+            // Update status order
+            $order = Order::find($request->order_id);
+            $order->status_id = $request->status_id;
+            $order->save();
+            
+        } catch (Exception $error) {
+            Log::debug("Error al actualizar estado de la orden: " . $error->getMessage() . ' line: ' . $error->getLine());
+            $this->model::newOrderAudit($order->order_number, [
+                "info" => "Error al actualizar estado de la orden",
+                "data_sent" => $request->all(),
+                "error_message" => $error->getMessage(), 
+                "error_line" => $error->getLine(),
+            ]);
+            return response(["message" => "Error al actualizar estado de la orden", "error" => $error->getMessage()], 500);
+        }
+
+
+        return response()->json(['message' => 'Estado de la orden actualizada con exito.']);
+    }
 }
