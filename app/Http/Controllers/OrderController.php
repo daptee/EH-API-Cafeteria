@@ -79,10 +79,17 @@ class OrderController extends Controller
 
         try {
             // Update status order
-            $order = Order::find($request->order_id);
+            $order = $this->model::find($request->order_id);
             $order->status_id = $request->status_id;
             $order->save();
             
+            $this->model::newOrderAudit($request->order_number, [
+                "info" => "Cambio de estado",
+                "data_sent" => $request->all(),
+                "error_message" => null, 
+                "error_line" => null,
+            ]);
+
         } catch (Exception $error) {
             Log::debug("Error al actualizar estado de la orden: " . $error->getMessage() . ' line: ' . $error->getLine());
             $this->model::newOrderAudit($order->order_number, [

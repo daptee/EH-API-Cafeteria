@@ -63,16 +63,27 @@ class ProductController extends Controller
 
     public function product_images($product_code)
     {
-        $product_images = ProductImage::where('product_code', $product_code)->get();
+        $product_images = $this->model::where('product_code', $product_code)->get();
 
         return response()->json(['product_images' => $product_images], 200);
     }
 
-    
     public function product_images_principal()
     {
-        $products_images = ProductImage::where('principal_image', 1)->get();
+        $products_images = $this->model::where('principal_image', 1)->get();
 
         return response()->json(['products_images' => $products_images], 200);
+    }
+
+    public function product_images_delete($image_id)
+    {
+        $product_image = $this->model::find($image_id);
+        
+        if(!$product_image)
+            return response()->json(['message' => 'ID image invalido.'], 400);
+        
+        $product_image->delete();
+    
+        return response()->json(['message' => 'Imagen eliminada con exito.'], 200);
     }
 }
