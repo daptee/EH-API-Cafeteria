@@ -28,33 +28,30 @@ class CategoryController extends Controller
         ]);
 
         try {
-                $category_image = $this->model::where('category_image', $request->cod_category)->first();
+                $category_image = $this->model::where('cod_category', $request->cod_category)->first();
                 
-                // if($response_save_image['status'] == 200){
                 if(!isset($category_image))
                     $category_image = new $this->model();
                 
                 $category_image->sector = 2;
                 $category_image->cod_category = $request->cod_category;
 
-                if($request->img)
+                if($request->img){
                     $response_save_image = $this->save_image_public_folder($request->img, "categories/images/");
+                    $category_image->img = $response_save_image['path'] ?? null;
+                }
 
                 if($request->color)
                     $category_image->color = $request->color;
                 
-                $category_image->img = $response_save_image['path'] ?? null;
                 $category_image->save();
              
-                // }else{
-                    // Log::debug(["error" => "Error al guardar imagen", "message" => $response_save_image['message'], "cod_category" => $request->cod_category]);
-                // }
         } catch (Exception $error) {
             Log::debug("Error al guardar imagen: " . $error->getMessage() . ' line: ' . $error->getLine());
             return response(["message" => "Error al guardar imagen", "error" => $error->getMessage()], 500);
         }
        
-        return response()->json(['message' => 'Imagen guardada exitosamente.'], 200);
+        return response()->json(['message' => 'imagen/color de categoria guardado exitosamente.'], 200);
     }
 
     public function save_image_public_folder($file, $path_to_save)
