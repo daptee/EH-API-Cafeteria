@@ -28,16 +28,24 @@ class CategoryController extends Controller
         ]);
 
         try {
-            if($request->img)
-                $response_save_image = $this->save_image_public_folder($request->img, "categories/images/");
-
+                $category_image = $this->model::where('category_image', $request->cod_category)->first();
+                
                 // if($response_save_image['status'] == 200){
-                $category_image = new $this->model();
+                if(!isset($category_image))
+                    $category_image = new $this->model();
+                
                 $category_image->sector = 2;
                 $category_image->cod_category = $request->cod_category;
+
+                if($request->img)
+                    $response_save_image = $this->save_image_public_folder($request->img, "categories/images/");
+
+                if($request->color)
+                    $category_image->color = $request->color;
+                
                 $category_image->img = $response_save_image['path'] ?? null;
-                $category_image->color = $request->color;
                 $category_image->save();
+             
                 // }else{
                     // Log::debug(["error" => "Error al guardar imagen", "message" => $response_save_image['message'], "cod_category" => $request->cod_category]);
                 // }
