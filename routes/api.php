@@ -21,6 +21,8 @@ use Illuminate\Support\Facades\Artisan;
 Route::post('order', [OrderController::class, 'store']);
 Route::post('order/change/status', [OrderController::class, 'order_change_status']);
 Route::get('order/{id}', [OrderController::class, 'show']);
+Route::get('order/number/{order_number}', [OrderController::class, 'order_get_by_number']);
+Route::get('order/status/list', [OrderController::class, 'get_status_list']);
 
 // Payment
 Route::post('payment', [PaymentController::class, 'store']);

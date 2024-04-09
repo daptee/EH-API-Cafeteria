@@ -104,4 +104,30 @@ class OrderController extends Controller
 
         return response()->json(['message' => 'Estado de la orden actualizada con exito.']);
     }
+
+    public function order_get_by_number($order_number)
+    {
+        $order = $this->model::with(['status','status_history.status', 'rejected_history'])->where('order_number', $order_number)->first();
+        
+        if(!$order)
+            return response()->json(['message' => 'Orden no existente.'], 400);
+
+        return response()->json(['order' => $order]);
+    }
+
+    public function get_status_list()
+    {
+        $order_status_list = null;
+        try {
+            $order_status_list = OrderStatus::all();
+        } catch (Exception $error) {
+            Log::debug([
+                "error al obtener listado de estados: " . $error->getMessage(),
+                "line: " . $error->getLine()
+            ]);
+            return response(["error" => $error->getMessage()], 500);
+        }
+
+        return response()->json(['order_status_list' => $order_status_list], 200);
+    }
 }
