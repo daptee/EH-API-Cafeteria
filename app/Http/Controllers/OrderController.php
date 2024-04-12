@@ -89,6 +89,8 @@ class OrderController extends Controller
                 "error_message" => null, 
                 "error_line" => null,
             ]);
+            
+            $this->model::newOrderStatusHistory($request->status_id, $order->id);
 
         } catch (Exception $error) {
             Log::debug("Error al actualizar estado de la orden: " . $error->getMessage() . ' line: ' . $error->getLine());
