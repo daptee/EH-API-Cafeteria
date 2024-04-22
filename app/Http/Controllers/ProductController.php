@@ -36,6 +36,7 @@ class ProductController extends Controller
                     $product_images->product_code = $request->product_code;
                     $product_images->url = $response_save_image['path'];
                     $product_images->principal_image = $image['principal'];
+                    $product_images->banner_image = $image['banner'];
                     $product_images->save();
                 }else{
                     Log::debug(["error" => "Error al guardar imagen", "message" => $response_save_image['message'], "product_code" => $request->product_code]);

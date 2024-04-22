@@ -3,6 +3,7 @@
 /public/hot
 /public/storage
 /public/publications
+/public/products
 /public/categories
 /public/users
 /storage/*.key
