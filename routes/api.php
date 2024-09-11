@@ -36,6 +36,7 @@ Route::get('product/images_principal', [ProductController::class, 'product_image
 // Categories images
 Route::post('category/image', [CategoryController::class, 'store']);
 Route::get('category/image/{cod_category}', [CategoryController::class, 'category_images']);
+Route::get('categories', [CategoryController::class, 'categories']);
 Route::post('category/images/delete/{image_id}', [CategoryController::class, 'delete_category_image']);
 
 // Clear cache

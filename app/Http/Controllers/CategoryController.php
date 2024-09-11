@@ -73,6 +73,13 @@ class CategoryController extends Controller
         return response()->json(['category_images' => $category_images], 200);
     }
 
+    public function categories()
+    {
+        $categories = $this->model::all();
+
+        return response()->json(['categories' => $categories], 200);
+    }
+
     public function delete_category_image($image_id)
     {
         $category_image = $this->model::find($image_id);
