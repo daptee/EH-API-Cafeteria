@@ -27,14 +27,14 @@ class CategoryController extends Controller
             'img' => [
                 'nullable',
                 'file', 
-                'max: 2000',
+                'max:2000',
                 function ($attribute, $value, $fail) {
                     $imageInfo = getimagesize($value);
                     if ($imageInfo) {
                         $width = $imageInfo[0];
                         $height = $imageInfo[1];
 
-                        if ($width <= $height) {
+                        if ($width < $height) {
                             $fail('La imagen debe ser de formato horizontal.');
                         }
 
