@@ -24,7 +24,30 @@ class CategoryController extends Controller
     {
         $request->validate([
             'cod_category' => 'required',
-            // 'img' => 'required',
+            'img' => [
+                'nullable',
+                'file', 
+                'max: 2000',
+                function ($attribute, $value, $fail) {
+                    $imageInfo = getimagesize($value);
+                    if ($imageInfo) {
+                        $width = $imageInfo[0];
+                        $height = $imageInfo[1];
+
+                        if ($width <= $height) {
+                            $fail('La imagen debe ser de formato horizontal.');
+                        }
+
+                        if ($width > 1600) {
+                            $fail('El ancho de la imagen no debe superar los 1600 píxeles.');
+                        }
+                    } else {
+                        $fail('El archivo debe ser una imagen válida.');
+                    }
+                }
+            ]
+        ], [
+            'img.max' => "El campo img debe ser menor a 2 MB.",
         ]);
 
         try {
@@ -37,6 +60,7 @@ class CategoryController extends Controller
                 $category_image->cod_category = $request->cod_category;
 
                 if($request->img){
+                    // validar: No superar los 2mb (dejar el valor de 2mb de facil cambio por si luego piden que la validacion sea a 5mb por ejemplo) y que la imagen sea formato horizontal y que tenga un ancho maximo de 1600. 
                     $response_save_image = $this->save_image_public_folder($request->img, "categories/images/");
                     $category_image->img = $response_save_image['path'] ?? null;
                 }

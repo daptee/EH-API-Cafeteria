@@ -25,7 +25,33 @@ class ProductController extends Controller
     {
         $request->validate([
             'product_code' => 'required',
-            'images' => 'required',
+            'images' => 'required|array',
+            'images.*.image' => [
+                'required',
+                'file',
+                'max: 2000',
+                function ($attribute, $value, $fail) {
+                    $imageInfo = getimagesize($value);
+                    if ($imageInfo) {
+                        $width = $imageInfo[0];
+                        $height = $imageInfo[1];
+
+                        if ($width <= $height) {
+                            $fail("La imagen {$attribute} debe ser de formato horizontal.");
+                        }
+
+                        if ($width > 1600) {
+                            $fail("La imagen {$attribute} no debe superar los 1600 píxeles de ancho.");
+                        }
+                    } else {
+                        $fail("El archivo {$attribute} debe ser una imagen válida.");
+                    }
+                }
+            ],
+            'images.*.principal' => 'required|boolean',
+            'images.*.banner' => 'required|boolean',
+        ], [
+            'images.*.image.max' => "Cada imagen debe ser menor a 2 MB.",
         ]);
 
         try {
