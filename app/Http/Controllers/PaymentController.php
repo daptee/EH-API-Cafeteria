@@ -46,7 +46,7 @@ class PaymentController extends Controller
             $order->save();
 
             $payment_order_status_id = $data['payment_status'];
-            $rejection_reason = $data['rejection_reason'];
+            $rejection_reason = $data['rejection_reason'] ?? null;
             Order::actionStatusOrder($payment_order_status_id, $rejection_reason, $order->id);
 
             Order::newOrderStatusHistory($payment_order_status_id, $order->id);
