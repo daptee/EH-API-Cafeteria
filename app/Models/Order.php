@@ -5,6 +5,7 @@ namespace App\Models;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Log;
 
@@ -17,9 +18,19 @@ class Order extends Model
         return $this->hasOne(OrderStatus::class, 'id', 'status_id');
     }
 
+    public function status_history(): HasMany
+    {
+        return $this->HasMany(OrderStatusHistory::class, 'order_id', 'id');
+    }
+
+    public function rejected_history(): HasMany
+    {
+        return $this->HasMany(RejectedPayment::class, 'order_id', 'id');
+    }
+
     public static function getAllOrder($id)
     {
-        return Order::with('status')->find($id);
+        return Order::with(['status','status_history.status', 'rejected_history'])->find($id);
     }
 
     public static function newOrderAudit($order_number, $detail)
@@ -50,5 +61,22 @@ class Order extends Model
                 "error_message" => $error->getMessage(), 
                 "error_line" => $error->getLine(),
             ]);}
+    }
+
+    public static function actionStatusOrder($status_id, $reason_rejection, $order_id)
+    {
+        switch ($status_id) {
+            case 2: // Pago rechazado
+                $rejected_payment = new RejectedPayment();
+                $rejected_payment->order_id = $order_id;
+                $rejected_payment->data = $reason_rejection;
+                $rejected_payment->save();
+                # code...
+                break;
+            
+            default:
+                # code...
+                break;
+        }
     }
 }

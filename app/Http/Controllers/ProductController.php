@@ -25,7 +25,33 @@ class ProductController extends Controller
     {
         $request->validate([
             'product_code' => 'required',
-            'images' => 'required',
+            'images' => 'required|array',
+            'images.*.image' => [
+                'required',
+                'file',
+                'max:2000',
+                function ($attribute, $value, $fail) {
+                    $imageInfo = getimagesize($value);
+                    if ($imageInfo) {
+                        $width = $imageInfo[0];
+                        $height = $imageInfo[1];
+
+                        if ($width < $height) {
+                            $fail("La imagen {$attribute} debe ser de formato horizontal.");
+                        }
+
+                        if ($width > 1600) {
+                            $fail("La imagen {$attribute} no debe superar los 1600 píxeles de ancho.");
+                        }
+                    } else {
+                        $fail("El archivo {$attribute} debe ser una imagen válida.");
+                    }
+                }
+            ],
+            'images.*.principal' => 'required|boolean',
+            'images.*.banner' => 'required|boolean',
+        ], [
+            'images.*.image.max' => "Cada imagen debe ser menor a 2 MB.",
         ]);
 
         try {
@@ -36,6 +62,7 @@ class ProductController extends Controller
                     $product_images->product_code = $request->product_code;
                     $product_images->url = $response_save_image['path'];
                     $product_images->principal_image = $image['principal'];
+                    $product_images->banner_image = $image['banner'];
                     $product_images->save();
                 }else{
                     Log::debug(["error" => "Error al guardar imagen", "message" => $response_save_image['message'], "product_code" => $request->product_code]);
@@ -63,16 +90,27 @@ class ProductController extends Controller
 
     public function product_images($product_code)
     {
-        $product_images = ProductImage::where('product_code', $product_code)->get();
+        $product_images = $this->model::where('product_code', $product_code)->get();
 
         return response()->json(['product_images' => $product_images], 200);
     }
 
-    
     public function product_images_principal()
     {
-        $products_images = ProductImage::where('principal_image', 1)->get();
+        $products_images = $this->model::where('principal_image', 1)->get();
 
         return response()->json(['products_images' => $products_images], 200);
+    }
+
+    public function product_images_delete($image_id)
+    {
+        $product_image = $this->model::find($image_id);
+        
+        if(!$product_image)
+            return response()->json(['message' => 'ID image invalido.'], 400);
+        
+        $product_image->delete();
+    
+        return response()->json(['message' => 'Imagen eliminada con exito.'], 200);
     }
 }

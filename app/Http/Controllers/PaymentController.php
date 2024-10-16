@@ -6,6 +6,7 @@ use App\Mail\PaymentNotification;
 use App\Models\Order;
 use App\Models\OrderStatus;
 use App\Models\PaymentAttemptHistory;
+use App\Models\RejectedPayment;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -43,6 +44,11 @@ class PaymentController extends Controller
             $payment_order_status_id = $data['payment_status'];
             $order->status_id = $payment_order_status_id;
             $order->save();
+
+            $payment_order_status_id = $data['payment_status'];
+            $rejection_reason = $data['rejection_reason'] ?? null;
+            Order::actionStatusOrder($payment_order_status_id, $rejection_reason, $order->id);
+
             Order::newOrderStatusHistory($payment_order_status_id, $order->id);
 
             // if($payment_order_status_id == OrderStatus::CONFIRMADO){
@@ -55,8 +61,9 @@ class PaymentController extends Controller
             //         Log::debug(print_r(["message" => $error->getMessage() . " error en envio de mail a $client_email en notificacion de orden confirmada", "order_number" => $order->order_number, $error->getLine()],  true));
             //     }
             // }
+
             
-            Order::newOrderAudit($request->order_number, [
+            Order::newOrderAudit($order->order_number, [
                 "info" => "Registro de pago exitoso",
                 "data_sent" => $request->all(),
                 "error_message" => null, 
@@ -75,5 +82,45 @@ class PaymentController extends Controller
         }
        
         return response()->json(['message' => 'Informacion de pago guardada con exito.', 'payment' => $payment], 200);
+    }
+
+    public function rejected_payment(Request $request)
+    {
+        $request->validate([
+            'order_id' => ['required', Rule::exists('orders', 'id')],
+            'status_id' => ['required'],
+            'data' => ['required'],
+        ]);
+
+        try {
+            $order = Order::find($request->order_id);
+
+            $rejected_payment = new RejectedPayment();
+            $rejected_payment->order_id = $request->order_id;
+            $rejected_payment->data = $request->data;
+            $rejected_payment->save();
+
+            $order->status_id = $request->status_id;
+            $order->save();
+            
+            Order::newOrderStatusHistory($request->status_id, $order->id);
+
+            Order::newOrderAudit($order->order_number, [
+                "info" => "Motivo de rechazo de pago guardado con exito",
+                "data_sent" => $request->all(),
+                "error_message" => null, 
+                "error_line" => null,
+            ]);
+
+        } catch (Exception $error) {
+            Order::newOrderAudit($order->order_number, [
+                "info" => "Error al registar motivo de rechazo de pago",
+                "data_sent" => $request->all(),
+                "error_message" => $error->getMessage(), 
+                "error_line" => $error->getLine(),
+            ]);
+        }
+
+        return response()->json(['message' => 'Motivo de rechazo de pago guardado con exito.']);
     }
 }
